@@ -187,7 +187,7 @@ void eraseFish1() {
 	}
 }
 
-void drawFish2() {
+void drawFish3() {
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 9; j++) {
 			gotoxy(j + 2, i + FishPosition); cout << Fish2[i][j];
@@ -196,7 +196,7 @@ void drawFish2() {
 }
 
 
-void eraseFish2() {
+void eraseFish3() {
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 9; j++) {
 			gotoxy(j + 2, i + FishPosition); cout << " ";
@@ -268,7 +268,7 @@ void Game_Over() {
 		cout << "\t\tSWALLOWED UP BY PLASTIC.\n";
 		break;
 	case 6:
-		cout << "\t\tEnd the take, make, waste economy. Think CIRCULARITY\nSingle use plastic is a BIG no no.";
+		cout << "\t\tEnd the take, make, waste economy. Think CIRCULARITY\n\t\tSingle use plastic is a BIG no no.";
 		break;
 	case 7:
 		cout << "\t\tCarpe dayum!\n";
@@ -419,7 +419,7 @@ void playGame2() {
 			}
 		}
 
-		drawFish2();
+		drawFish1();
 		drawPlastic2(0);
 		drawPlastic2(1);
 		if (collision2() == 1) {
@@ -428,7 +428,7 @@ void playGame2() {
 		}
 		Sleep(100); 
 		
-		eraseFish2();
+		eraseFish1();
 		erasePlastic2(0);
 		erasePlastic2(1);
 		FishPosition += 1;
@@ -499,7 +499,7 @@ void playGame3() {
 			}
 		}
 
-		drawFish2();
+		drawFish3();
 		drawPlastic3(0);
 		drawPlastic3(1);
 		if (collision3() == 1) {
@@ -508,7 +508,7 @@ void playGame3() {
 		}
 		Sleep(100);
 		
-		eraseFish2();
+		eraseFish3();
 		erasePlastic3(0);
 		erasePlastic3(1);
 		FishPosition += 1;
