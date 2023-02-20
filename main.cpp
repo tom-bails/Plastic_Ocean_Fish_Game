@@ -1,43 +1,44 @@
-#include<iostream>
-#include<conio.h>
+#include<iostream> 
+#include <windows.h> 
 #include<dos.h>
-#include<stdlib.h>
+#include<stdlib.h> 
 #include<string.h>
-#include <windows.h>
+#include<conio.h>
 #include <time.h>
 
-#define SCREEN_WIDTH 90
-#define SCREEN_HEIGHT 26
-#define WIN_WIDTH 70
-#define MENU_WIDTH 20
-#define GAP_SIZE 7
-#define PIPE_DIF 45
+#define WIDTH_OF_CONSOLE 90
+#define HEIGHT_OF_CONSOLE 26
+#define WIDTH_OF_CONSOLE 70   
+#define WIDTH_OF_MENU 20
+#define SizeOfSwimGap 7    
 
 using namespace std;
-//		cout<<"±±±±±±±±±";
+
+
+char Fish[2][9] = { 'D',';','-','-','{','{','{','\\',',',
+					'D','"','_','_','{','{','{','/','"' };
+
+
+int FishPosition = 6; 
+int Scoreboard = 0;   
+int PlasticPosition[3];
+int SwimGapPosition[3];
+int PlasticFlag[3];
+
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-COORD CursorPosition;
-
-int pipePos[3];
-int gapPos[3];
-int pipeFlag[3];
-char Fish[2][6] = { '/','-','-','o','\\',' ',
-					'|','_','_','_',' ','>' };
-int FishPos = 6;
-int score = 0;
-
+COORD PositioningOfCursor; 
 void gotoxy(int x, int y)
 {
-	CursorPosition.X = x;
-	CursorPosition.Y = y;
-	SetConsoleCursorPosition(console, CursorPosition);
+	PositioningOfCursor.X = x;  
+	PositioningOfCursor.Y = y;  
+	SetConsoleCursorPosition(console, PositioningOfCursor); 
 }
 
 void setcursor(bool visible, DWORD size)
 {
 	if (size == 0)
-		size = 20;
+		size = 20; 
 
 	CONSOLE_CURSOR_INFO lpCursor;
 	lpCursor.bVisible = visible;
@@ -45,170 +46,223 @@ void setcursor(bool visible, DWORD size)
 	SetConsoleCursorInfo(console, &lpCursor);
 }
 
+
 void drawBorder() {
-
-	for (int i = 0; i < SCREEN_WIDTH; i++) {
-		gotoxy(i, 0); cout << "±";
-		gotoxy(i, SCREEN_HEIGHT); cout << "±";
+	
+	for (int i = 0; i < WIDTH_OF_CONSOLE; i++) {
+		gotoxy(i, 0); cout << "=";
+		gotoxy(i, HEIGHT_OF_CONSOLE); cout << "=";
 	}
 
-	for (int i = 0; i < SCREEN_HEIGHT; i++) {
-		gotoxy(0, i); cout << "±";
-		gotoxy(SCREEN_WIDTH, i); cout << "±";
+	for (int i = 0; i < HEIGHT_OF_CONSOLE; i++) {
+		gotoxy(0, i); cout << "=";
+		gotoxy(WIDTH_OF_CONSOLE, i); cout << "=";
 	}
-	for (int i = 0; i < SCREEN_HEIGHT; i++) {
-		gotoxy(WIN_WIDTH, i); cout << "±";
-	}
-}
-void genPipe(int ind) {
-	gapPos[ind] = 3 + rand() % 14;
-}
-void drawPipe(int ind) {
-	if (pipeFlag[ind] == true) {
-		for (int i = 0; i < gapPos[ind]; i++) {
-			gotoxy(WIN_WIDTH - pipePos[ind], i + 1); cout << "***";
-		}
-		for (int i = gapPos[ind] + GAP_SIZE; i < SCREEN_HEIGHT - 1; i++) {
-			gotoxy(WIN_WIDTH - pipePos[ind], i + 1); cout << "***";
-		}
+	for (int i = 0; i < HEIGHT_OF_CONSOLE; i++) {
+		gotoxy(WIDTH_OF_CONSOLE, i); cout << "=";
 	}
 }
-void erasePipe(int ind) {
-	if (pipeFlag[ind] == true) {
-		for (int i = 0; i < gapPos[ind]; i++) {
-			gotoxy(WIN_WIDTH - pipePos[ind], i + 1); cout << "   ";
+
+
+void ProducePlastic(int ind) {
+	srand(time(NULL)); 
+	SwimGapPosition[ind] = 3 + rand() % 14;
+}
+
+
+void drawPlastic(int ind) {
+	if (PlasticFlag[ind] == true) {  
+		for (int i = 0; i < SwimGapPosition[ind]; i++) {
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "=======";
 		}
-		for (int i = gapPos[ind] + GAP_SIZE; i < SCREEN_HEIGHT - 1; i++) {
-			gotoxy(WIN_WIDTH - pipePos[ind], i + 1); cout << "   ";
+		for (int i = SwimGapPosition[ind] + SizeOfSwimGap; i < HEIGHT_OF_CONSOLE - 1; i++) {
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "=======";
 		}
 	}
 }
+
+
+void erasePlastic(int ind) {
+	if (PlasticFlag[ind] == true) {
+		for (int i = 0; i < SwimGapPosition[ind]; i++) {
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "       ";
+		}
+		for (int i = SwimGapPosition[ind] + SizeOfSwimGap; i < HEIGHT_OF_CONSOLE - 1; i++) {
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "       ";
+		}
+	}
+}
+
+
+
+
 
 void drawFish() {
 	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < 6; j++) {
-			gotoxy(j + 2, i + FishPos); cout << Fish[i][j];
-		}
-	}
-}
-void eraseFish() {
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < 6; j++) {
-			gotoxy(j + 2, i + FishPos); cout << " ";
+		for (int j = 0; j < 9; j++) {
+			gotoxy(j + 2, i + FishPosition); cout << Fish[i][j];
 		}
 	}
 }
 
+
+void eraseFish() {
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < 9; j++) {
+			gotoxy(j + 2, i + FishPosition); cout << " ";
+		}
+	}
+}
+
+
+
 int collision() {
-	if (pipePos[0] >= 61) {
-		if (FishPos<gapPos[0] || FishPos >gapPos[0] + GAP_SIZE) {
-			//			cout<< " HIT ";
-			//			getch();
+	if (PlasticPosition[0] >= 61) {
+		if (FishPosition < SwimGapPosition[0] || FishPosition > SwimGapPosition[0] + SizeOfSwimGap) {
+			srand(time(NULL));
+			int choice = std::rand() % 10;
+			switch (choice) { 
+			case 0:
+				cout << "The Fish was Swallowed Up by Plastic in the Ocean.\n";
+				break;
+			case 1:
+				cout << "Killed by Plastic..... AGAIN!\n";
+				break;
+			case 2:
+				cout << "You are an adult, don't litter.\n";
+				break;
+			case 3:
+				cout << "Four R's, my friend: Reduce, reuse, recycle, Rihanna.\n";
+				break;
+			case 4:
+				cout << "No no no, think you throw away your litter.\n";
+				break;
+			case 5:
+				cout << "SWALLOWED UP BY PLASTIC.\n";
+				break;
+			case 6:
+				cout << "End the take, make, waste economy. Think CIRCULARITY\nSingle use plastic is a BIG no no.";
+				break;
+			case 7:
+				cout << "Carpe dayum!\n";
+				break;
+			case 8:
+				cout << "What can YOU do to stop plastic entering the oceans\n";
+				break;
+			case 9:
+				cout << "Be the change you want to SEA in the world.\n";
+				break;
+			default:
+				cout << "The time to ACT is NOW.\n";
+				break;
+			}
+			_getch();
 			return 1;
 		}
 	}
 	return 0;
 }
-void debug() {
-	//	gotoxy(SCREEN_WIDTH + 3, 4); cout<<"Pipe Pos: "<<pipePos[0];
 
-}
-void gameover() {
-	system("cls");
+
+void Game_Over() {
+	system("cls"); 
 	cout << endl;
-	cout << "\t\t--------------------------" << endl;
-	cout << "\t\t-------- Game Over -------" << endl;
-	cout << "\t\t--------------------------" << endl << endl;
+	cout << "             ______   GAME   ___________" << endl;
+	cout << "             ________   OVER   _________" << endl;
+	cout << "             ___________________________" << endl << endl;
+	cout << "\t\tPlastic is reducing fish numbers.";
 	cout << "\t\tPress any key to go back to menu.";
-	std::cin;
+	_getch();
+
 }
-void updateScore() {
-	gotoxy(WIN_WIDTH + 7, 5); cout << "Score: " << score << endl;
+void UpdateScoreboard() {
+	gotoxy(WIDTH_OF_CONSOLE + 7, 5); cout << "Score: " << Scoreboard << endl;
 }
 
-void instructions() {
+void User_Information() {
 
 	system("cls");
-	cout << "Instructions";
+	cout << "User_Information";
 	cout << "\n----------------";
-	cout << "\n Press spacebar to make Fish fly";
-	cout << "\n\nPress any key to go back to menu";
-	std::cin;
+	cout << "\nSadly there is plenty of plastic polluting the oceans.";
+	cout << "\nSpacebar triggers the Fish to swim upwards to escape the plastic mountains.";
+	cout << "\n\nFor the Main Menu, Tap a Button";
+	_getch();
 }
 
-void play() {
+void playGame() {
 
-	FishPos = 6;
-	score = 0;
-	pipeFlag[0] = 1;
-	pipeFlag[1] = 0;
-	pipePos[0] = pipePos[1] = 4;
+	FishPosition = 6; 
+	Scoreboard = 0;   
+	PlasticFlag[0] = 1;
+	PlasticFlag[1] = 0;
+	PlasticPosition[0] = PlasticPosition[1] = 4;
 
-	system("cls");
+	system("cls"); 
 	drawBorder();
-	genPipe(0);
-	updateScore();
+	ProducePlastic(0);
+	UpdateScoreboard();
 
-	gotoxy(WIN_WIDTH + 5, 2); cout << "Plastic Ocean Fish";
-	gotoxy(WIN_WIDTH + 6, 4); cout << "----------";
-	gotoxy(WIN_WIDTH + 6, 6); cout << "----------";
-	gotoxy(WIN_WIDTH + 7, 12); cout << "Control ";
-	gotoxy(WIN_WIDTH + 7, 13); cout << "-------- ";
-	gotoxy(WIN_WIDTH + 2, 14); cout << " Spacebar = jump";
-
-	gotoxy(10, 5); cout << "Press any key to start";
-	std::cin;
+	gotoxy(WIDTH_OF_CONSOLE + 3, 2); cout << "Plastic Ocean";
+	gotoxy(WIDTH_OF_CONSOLE + 6, 4); cout << "   Fish";
+	gotoxy(WIDTH_OF_CONSOLE + 6, 6); cout << "             ";
+	gotoxy(WIDTH_OF_CONSOLE + 7, 12); cout << "          ";
+	gotoxy(WIDTH_OF_CONSOLE + 7, 13); cout << "         ";
+	gotoxy(WIDTH_OF_CONSOLE + 2, 14); cout << "  Spacebar = swim";
+	gotoxy(10, 5); cout << "Press a button to Start Game";
+	_getch();
 	gotoxy(10, 5); cout << "                      ";
 
 	while (1) {
 
 		if (_kbhit()) {
-			char ch = _getch();
-			if (ch == 32) {
-				if (FishPos > 3)
-					FishPos -= 3;
+			char spacebar = _getch();
+			if (spacebar == 32) {
+				if (FishPosition > 3)
+					FishPosition -= 3;
 			}
-			if (ch == 27) {
+			if (spacebar == 27) {
 				break;
 			}
 		}
 
 		drawFish();
-		drawPipe(0);
-		drawPipe(1);
-		debug();
+		drawPlastic(0);
+		drawPlastic(1);
 		if (collision() == 1) {
-			gameover();
+			Game_Over();
 			return;
 		}
-		Sleep(100);
+		Sleep(100); 
+		
 		eraseFish();
-		erasePipe(0);
-		erasePipe(1);
-		FishPos += 1;
+		erasePlastic(0);
+		erasePlastic(1);
+		FishPosition += 1;
 
-		if (FishPos > SCREEN_HEIGHT - 2) {
-			gameover();
+		if (FishPosition > HEIGHT_OF_CONSOLE - 3) {  
+			Game_Over();
 			return;
 		}
 
-		if (pipeFlag[0] == 1)
-			pipePos[0] += 2;
 
-		if (pipeFlag[1] == 1)
-			pipePos[1] += 2;
+		if (PlasticFlag[0] == 1)
+			PlasticPosition[0] += 2;
 
-		if (pipePos[0] >= 40 && pipePos[0] < 42) {
-			pipeFlag[1] = 1;
-			pipePos[1] = 4;
-			genPipe(1);
+		if (PlasticFlag[1] == 1)
+			PlasticPosition[1] += 2;
+
+		if (PlasticPosition[0] >= 40 && PlasticPosition[0] < 42) {
+			PlasticFlag[1] = 1;
+			PlasticPosition[1] = 4;
+			ProducePlastic(1);
 		}
-		if (pipePos[0] > 68) {
-			score++;
-			updateScore();
-			pipeFlag[1] = 0;
-			pipePos[0] = pipePos[1];
-			gapPos[0] = gapPos[1];
+		if (PlasticPosition[0] > 68) {
+			Scoreboard++;
+			UpdateScoreboard();
+			PlasticFlag[1] = 0;
+			PlasticPosition[0] = PlasticPosition[1];
+			SwimGapPosition[0] = SwimGapPosition[1];
 		}
 
 	}
@@ -219,22 +273,20 @@ int main()
 {
 	setcursor(0, 0);
 	srand((unsigned)time(NULL));
-
-	//	play();
-
+	
 	do {
 		system("cls");
-		gotoxy(10, 5); cout << " -------------------------- ";
-		gotoxy(10, 6); cout << " |      Plastic Ocean Fish       | ";
-		gotoxy(10, 7); cout << " --------------------------";
+		gotoxy(10, 5); cout << "                              ";
+		gotoxy(10, 6); cout << "   Fish in a Plastic Ocean    ";
+		gotoxy(10, 7); cout << "                              ";
 		gotoxy(10, 9); cout << "1. Start Game";
-		gotoxy(10, 10); cout << "2. Instructions";
+		gotoxy(10, 10); cout << "2. User Information";
 		gotoxy(10, 11); cout << "3. Quit";
-		gotoxy(10, 13); cout << "Select option: ";
+		gotoxy(10, 13); cout << "Pick your selection: ";
 		char op = _getch();
 
-		if (op == '1') play();
-		else if (op == '2') instructions();
+		if (op == '1') playGame();
+		else if (op == '2') User_Information();
 		else if (op == '3') exit(0);
 
 	} while (1);
