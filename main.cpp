@@ -2,6 +2,7 @@
 #include <windows.h> 
 #include<dos.h>
 #include<stdlib.h> 
+#include <stdio.h>
 #include<string.h>
 #include<conio.h>
 #include <time.h>
@@ -17,21 +18,144 @@
 
 using namespace std;
 
+
+
+
+/////////// Colours ///////////////////
+enum ColorAttribute
+{
+	caNORMAL = 0,
+	caBOLD = 1,
+	caUNDERLINE = 4,
+	caBLINKING = 5,
+	caREVERSED = 7,
+	caCONCEALED = 8
+};
+enum ForegroundColor
+{
+	fgBLACK = 30,
+	fgRED = 31,
+	fgGREEN = 32,
+	fgORANGE = 33,
+	fgBLUE = 34,
+	fgPURPLE = 35,
+	fgCYAN = 36,
+	fgGREY = 37,
+	fgGRAY = 37,
+	fgDARKGREY = 90,
+	fgDARKGRAY = 90,
+	fgLIGHTRED = 91,
+	fgLIGHTGREEN = 92,
+	fgYELLOW = 93,
+	fgLIGHTBLUE = 94,
+	fgLIGHTPURPLE = 95,
+	fgTURQUOISE = 96
+};
+enum BackgroundColor
+{
+	bgBLACK = 40,
+	bgRED = 41,
+	bgGREEN = 42,
+	bgORANGE = 43,
+	bgBLUE = 44,
+	bgPURPLE = 45,
+	bgCYAN = 46,
+	bgGREY = 47,
+	bgGRAY = 47,
+	bgDARKGREY = 100,
+	bgDARKGRAY = 100,
+	bgLIGHTRED = 101,
+	bgLIGHTGREEN = 102,
+	bgYELLOW = 103,
+	bgLIGHTBLUE = 104,
+	bgLIGHTPURPLE = 105,
+	bgTURQUOISE = 106
+};
+void setcolors(int foreground, int background, int attribute)
+{
+	printf("\033[%i;%i;%im", attribute, foreground, background);
+}
+void resetcolors(void)
+{
+	printf("\033[0m");
+}
+int printfc(int fg, int bg, int attr, const char* format, ...)
+{
+	int count;    /* characters printed (like printf) */
+	va_list args; /* list of args from ...            */
+
+	va_start(args, format);        /* find args         */
+	setcolors(fg, bg, attr);       /* change the colors */
+	count = vprintf(format, args); /* do the printing   */
+	va_end(args);                  /* done              */
+
+	resetcolors();                 /* reset the colors         */
+	printf("\n");                  /* should the user do this? */
+	return count;                  /* mimic printf             */
+}
+
+void INFO(const char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	printfc(fgYELLOW, bgLIGHTBLUE, caNORMAL, format, args);
+	va_end(args);
+}
+void PLASTIC_COLOUR(const char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	printfc(fgGRAY, bgGREY, caBOLD, format, args);
+	va_end(args);
+}
+void GAME_OVER_COLOUR(const char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	printfc(fgYELLOW, bgBLACK, caBLINKING, format, args);
+	va_end(args);
+}
+
+/*
+int main(void)
+{
+  int code = 7560; // To demonstrate variadic function
+
+INFO("The weather today is going to be cold and clear.");
+PLASTIC_COLOUR("The mountains may get up to a foot of snow by 8 pm.");
+GAME_OVER_COLOUR("Unable to contact the weather station. (ERR:C%i)", code);
+
+return 0;
+}
+*/
+
+
+/////////////////////////
+
+
+
+
 char Fish1[1][6] = { '>','<','{','{','"','>', };
 
 char Fish2[2][9] = { 'D',';','-','-','{','{','{','\\',',',
 					'D','"','_','_','{','{','{','/','"' };
 
-
+int AttemptCount = 0;
+int HighScore1 = 0;
+int HighScore2 = 0;
+int HighScore3 = 0;
 int FishPosition = 6; 
-int Scoreboard = 0;   
+int Scoreboard1 = 0;   
+int Scoreboard2 = 0;
+int Scoreboard3 = 0;
 int PlasticPosition[3];
 int SwimGapPosition[3];
-int PlasticFlag[3];
-
+int PlasticFlag1[7];
+int PlasticFlag2[7];
+int PlasticFlag3[7];
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-COORD PositioningOfCursor; 
+COORD PositioningOfCursor;
 void gotoxy(int x, int y)
 {
 	PositioningOfCursor.X = x;  
@@ -75,19 +199,19 @@ void ProducePlastic1(int ind) {
 
 
 void drawPlastic1(int ind) {
-	if (PlasticFlag[ind] == true) {  
+	if (PlasticFlag1[ind] == true) {  
 		for (int i = 0; i < SwimGapPosition[ind]; i++) {
-			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "=======";
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); PLASTIC_COLOUR("=======");
 		}
 		for (int i = SwimGapPosition[ind] + SizeOfSwimGap1; i < HEIGHT_OF_CONSOLE - 1; i++) {
-			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "=======";
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); PLASTIC_COLOUR("=======");
 		}
 	}
 }
 
 
 void erasePlastic1(int ind) {
-	if (PlasticFlag[ind] == true) {
+	if (PlasticFlag1[ind] == true) {
 		for (int i = 0; i < SwimGapPosition[ind]; i++) {
 			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "       ";
 		}
@@ -107,19 +231,19 @@ void ProducePlastic2(int ind) {
 
 
 void drawPlastic2(int ind) {
-	if (PlasticFlag[ind] == true) {
+	if (PlasticFlag2[ind] == true) {
 		for (int i = 0; i < SwimGapPosition[ind]; i++) {
-			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "===================================";
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); PLASTIC_COLOUR("===================================");
 		}
 		for (int i = SwimGapPosition[ind] + SizeOfSwimGap2; i < HEIGHT_OF_CONSOLE - 1; i++) {
-			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "====================================";
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); PLASTIC_COLOUR("====================================");
 		}
 	}
 }
 
 
 void erasePlastic2(int ind) {
-	if (PlasticFlag[ind] == true) {
+	if (PlasticFlag2[ind] == true) {
 		for (int i = 0; i < SwimGapPosition[ind]; i++) {
 			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "                                   ";
 		}
@@ -139,19 +263,19 @@ void ProducePlastic3(int ind) {
 
 
 void drawPlastic3(int ind) {
-	if (PlasticFlag[ind] == true) {
+	if (PlasticFlag3[ind] == true) {
 		for (int i = 0; i < SwimGapPosition[ind]; i++) {
-			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "===================================";
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); PLASTIC_COLOUR("===================================");
 		}
 		for (int i = SwimGapPosition[ind] + SizeOfSwimGap3; i < HEIGHT_OF_CONSOLE - 1; i++) {
-			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "====================================";
+			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); PLASTIC_COLOUR("====================================");
 		}
 	}
 }
 
 
 void erasePlastic3(int ind) {
-	if (PlasticFlag[ind] == true) {
+	if (PlasticFlag3[ind] == true) {
 		for (int i = 0; i < SwimGapPosition[ind]; i++) {
 			gotoxy(WIDTH_OF_CONSOLE - PlasticPosition[ind], i + 1); cout << "                                   ";
 		}
@@ -242,9 +366,12 @@ int collision3() {
 void Game_Over() {
 	system("cls"); 
 	cout << endl;
-	cout << "             ______   GAME   ___________" << endl;
-	cout << "             ________   OVER   _________" << endl;
-	cout << "             ___________________________" << endl << endl;
+	cout << "\t\t";
+	GAME_OVER_COLOUR("______   GAME   ___________");
+	cout << "\t\t";
+	GAME_OVER_COLOUR("________   OVER   _________");
+	cout << "\t\t"; 
+	GAME_OVER_COLOUR("___________________________\n\n");
 	cout << "\n\n\n\n\t\tPlastic is reducing fish numbers.\n\n\n\n";
 	srand(time(NULL));
 	int choice = std::rand() % 10;
@@ -284,11 +411,25 @@ void Game_Over() {
 		break;
 	}
 	cout << "\n\n\n\t\tPress any key to go back to menu.";
+	AttemptCount++;
 	_getch();
 
 }
-void UpdateScoreboard() {
-	gotoxy(WIDTH_OF_CONSOLE + 7, 5); cout << "Score: " << Scoreboard << endl;
+void UpdateScoreboard1() {
+	gotoxy(WIDTH_OF_CONSOLE + 7, 5); cout << "Score: " << Scoreboard1 << endl;
+	gotoxy(WIDTH_OF_CONSOLE + 7, 7); cout << "Attempts: " << AttemptCount << endl;
+	gotoxy(WIDTH_OF_CONSOLE + 7, 9); cout << "High Score: " << HighScore1 << endl;
+}
+
+void UpdateScoreboard2() {
+	gotoxy(WIDTH_OF_CONSOLE + 7, 5); cout << "Score: " << Scoreboard2 << endl;
+	gotoxy(WIDTH_OF_CONSOLE + 7, 7); cout << "Attempts: " << AttemptCount << endl;
+	gotoxy(WIDTH_OF_CONSOLE + 7, 9); cout << "High Score: " << HighScore2 << endl;
+}
+void UpdateScoreboard3() {
+	gotoxy(WIDTH_OF_CONSOLE + 7, 5); cout << "Score: " << Scoreboard1 << endl;
+	gotoxy(WIDTH_OF_CONSOLE + 7, 7); cout << "Attempts: " << AttemptCount << endl;
+	gotoxy(WIDTH_OF_CONSOLE + 7, 9); cout << "High Score: " << HighScore2 << endl;
 }
 
 void User_Information() {
@@ -306,18 +447,18 @@ void User_Information() {
 void playGame1() {
 
 	FishPosition = 6;
-	Scoreboard = 0;
-	PlasticFlag[0] = 1;
-	PlasticFlag[1] = 0;
+	Scoreboard1 = 0;
+	PlasticFlag1[0] = 1;
+	PlasticFlag1[1] = 0;
 	PlasticPosition[0] = PlasticPosition[1] = 4;
 
 	system("cls");
 	drawBorder();
 	ProducePlastic1(0);
-	UpdateScoreboard();
+	UpdateScoreboard1();
 
 	gotoxy(WIDTH_OF_CONSOLE + 3, 2); cout << "Plastic Ocean";
-	gotoxy(WIDTH_OF_CONSOLE + 6, 4); cout << "   Fish";
+	gotoxy(WIDTH_OF_CONSOLE + 6, 3); cout << "   Fish";
 	gotoxy(WIDTH_OF_CONSOLE + 6, 6); cout << "             ";
 	gotoxy(WIDTH_OF_CONSOLE + 7, 12); cout << "          ";
 	gotoxy(WIDTH_OF_CONSOLE + 7, 13); cout << "         ";
@@ -342,6 +483,11 @@ void playGame1() {
 		drawFish1();
 		drawPlastic1(0);
 		drawPlastic1(1);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED |
+			FOREGROUND_GREEN |
+			FOREGROUND_INTENSITY |
+			BACKGROUND_BLUE
+		);
 		if (collision1() == 1) {
 			Game_Over();
 			return;
@@ -359,25 +505,27 @@ void playGame1() {
 		}
 
 
-		if (PlasticFlag[0] == 1)
+		if (PlasticFlag1[0] == 1)
 			PlasticPosition[0] += 2;
 
-		if (PlasticFlag[1] == 1)
+		if (PlasticFlag1[1] == 1)
 			PlasticPosition[1] += 2;
 
 		if (PlasticPosition[0] >= 40 && PlasticPosition[0] < 42) {
-			PlasticFlag[1] = 1;
+			PlasticFlag1[1] = 1;
 			PlasticPosition[1] = 4;
 			ProducePlastic1(1);
 		}
 		if (PlasticPosition[0] > 68) {
-			Scoreboard++;
-			UpdateScoreboard();
-			PlasticFlag[1] = 0;
+			Scoreboard1++;
+			UpdateScoreboard1();
+			PlasticFlag1[1] = 0;
 			PlasticPosition[0] = PlasticPosition[1];
 			SwimGapPosition[0] = SwimGapPosition[1];
 		}
-
+		if (Scoreboard1 >= HighScore1) {
+			HighScore1 = Scoreboard1;
+		}
 	}
 
 }
@@ -386,18 +534,18 @@ void playGame1() {
 void playGame2() {
 
 	FishPosition = 6; 
-	Scoreboard = 0;   
-	PlasticFlag[0] = 1;
-	PlasticFlag[1] = 0;
+	Scoreboard2 = 0;   
+	PlasticFlag2[0] = 1;
+	PlasticFlag2[1] = 0;
 	PlasticPosition[0] = PlasticPosition[1] = 4;
 
 	system("cls"); 
 	drawBorder();
 	ProducePlastic2(0);
-	UpdateScoreboard();
+	UpdateScoreboard2();
 
 	gotoxy(WIDTH_OF_CONSOLE + 3, 2); cout << "Plastic Ocean";
-	gotoxy(WIDTH_OF_CONSOLE + 6, 4); cout << "   Fish";
+	gotoxy(WIDTH_OF_CONSOLE + 6, 3); cout << "   Fish";
 	gotoxy(WIDTH_OF_CONSOLE + 6, 6); cout << "             ";
 	gotoxy(WIDTH_OF_CONSOLE + 7, 12); cout << "          ";
 	gotoxy(WIDTH_OF_CONSOLE + 7, 13); cout << "         ";
@@ -422,6 +570,11 @@ void playGame2() {
 		drawFish1();
 		drawPlastic2(0);
 		drawPlastic2(1);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED |
+			FOREGROUND_GREEN |
+			FOREGROUND_INTENSITY |
+			BACKGROUND_BLUE
+		);
 		if (collision2() == 1) {
 			Game_Over();
 			return;
@@ -439,25 +592,25 @@ void playGame2() {
 		}
 
 
-		if (PlasticFlag[0] == 1)
+		if (PlasticFlag2[0] == 1)
 			PlasticPosition[0] += 2;
-
-		if (PlasticFlag[1] == 1)
+		if (PlasticFlag2[1] == 1)
 			PlasticPosition[1] += 2;
-
 		if (PlasticPosition[0] >= 40 && PlasticPosition[0] < 42) {
-			PlasticFlag[1] = 1;
+			PlasticFlag2[1] = 1;
 			PlasticPosition[1] = 4;
 			ProducePlastic2(1);
 		}
 		if (PlasticPosition[0] > 68) {
-			Scoreboard++;
-			UpdateScoreboard();
-			PlasticFlag[1] = 0;
+			Scoreboard2++;
+			UpdateScoreboard2();
+			PlasticFlag2[1] = 0;
 			PlasticPosition[0] = PlasticPosition[1];
 			SwimGapPosition[0] = SwimGapPosition[1];
 		}
-
+		if (Scoreboard2 >= HighScore2) {
+			HighScore2 = Scoreboard2;
+		}
 	}
 
 }
@@ -466,18 +619,18 @@ void playGame2() {
 void playGame3() {
 
 	FishPosition = 6;
-	Scoreboard = 0;
-	PlasticFlag[0] = 1;
-	PlasticFlag[1] = 0;
+	Scoreboard3 = 0;
+	PlasticFlag3[0] = 1;
+	PlasticFlag3[1] = 0;
 	PlasticPosition[0] = PlasticPosition[1] = 4;
 
 	system("cls");
 	drawBorder();
 	ProducePlastic3(0);
-	UpdateScoreboard();
+	UpdateScoreboard3();
 
 	gotoxy(WIDTH_OF_CONSOLE + 3, 2); cout << "Plastic Ocean";
-	gotoxy(WIDTH_OF_CONSOLE + 6, 4); cout << "   Fish";
+	gotoxy(WIDTH_OF_CONSOLE + 6, 3); cout << "   Fish";
 	gotoxy(WIDTH_OF_CONSOLE + 6, 6); cout << "             ";
 	gotoxy(WIDTH_OF_CONSOLE + 7, 12); cout << "          ";
 	gotoxy(WIDTH_OF_CONSOLE + 7, 13); cout << "         ";
@@ -502,6 +655,11 @@ void playGame3() {
 		drawFish3();
 		drawPlastic3(0);
 		drawPlastic3(1);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED |
+			FOREGROUND_GREEN |
+			FOREGROUND_INTENSITY |
+			BACKGROUND_BLUE
+		);
 		if (collision3() == 1) {
 			Game_Over();
 			return;
@@ -519,24 +677,28 @@ void playGame3() {
 		}
 
 
-		if (PlasticFlag[0] == 1)
+		if (PlasticFlag3[0] == 1)
 			PlasticPosition[0] += 2;
 
-		if (PlasticFlag[1] == 1)
+		if (PlasticFlag3[1] == 1)
 			PlasticPosition[1] += 2;
 
 		if (PlasticPosition[0] >= 40 && PlasticPosition[0] < 42) {
-			PlasticFlag[1] = 1;
+			PlasticFlag3[1] = 1;
 			PlasticPosition[1] = 4;
 			ProducePlastic3(1);
 		}
 		if (PlasticPosition[0] > 68) {
-			Scoreboard++;
-			UpdateScoreboard();
-			PlasticFlag[1] = 0;
+			Scoreboard3++;
+			UpdateScoreboard3();
+			PlasticFlag3[1] = 0;
 			PlasticPosition[0] = PlasticPosition[1];
 			SwimGapPosition[0] = SwimGapPosition[1];
 		}
+		if (Scoreboard3 >= HighScore3) {
+			HighScore3 = Scoreboard3;
+		}
+
 
 	}
 
@@ -585,11 +747,21 @@ void MainMenu() {
 
 int main()
 {
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED |
+		FOREGROUND_GREEN |
+		FOREGROUND_INTENSITY |
+		BACKGROUND_BLUE
+	); 
 	setcursor(0, 0);
 	srand((unsigned)time(NULL));
 	
 	do {
 		MainMenu();
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED |
+			FOREGROUND_GREEN |
+			FOREGROUND_INTENSITY |
+			BACKGROUND_BLUE
+		);
 	} while (1);
 
 
