@@ -22,9 +22,9 @@ int Scoreboard2 = 0;  //current score variable for level 2
 int Scoreboard3 = 0;  //current score variable for level 3
 int PlasticPosition[3];  //initial obstacle posistion
 int SwimGapPosition[3];  //initial swim gap posistion
-int PlasticFlag1[7];  //
-int PlasticFlag2[7];  //
-int PlasticFlag3[7];  //
+int PlasticFlag1[7];  //  obstacle posistion
+int PlasticFlag2[7];  //  obstacle posistion
+int PlasticFlag3[7];  //  obstacle posistion
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE); //obtains handle for console window. All
 COORD PositioningOfCursor;  //x and y coording structure for console
@@ -129,8 +129,8 @@ char Fish2[2][9] = { 'D',';','-','-','{','{','{','\\',',',
 
 void gotoxy(int x, int y)
 {
-	PositioningOfCursor.X = x;
-	PositioningOfCursor.Y = y;
+	PositioningOfCursor.X = x;  //initial console x posistion 
+	PositioningOfCursor.Y = y;  //initial console y posistion
 	SetConsoleCursorPosition(console, PositioningOfCursor);
 } //function to set the initial x and y positions within the console
 
@@ -150,15 +150,14 @@ void drawBorder() {
 	for (int i = 0; i < WIDTH_OF_CONSOLE; i++) {
 		gotoxy(i, 0); cout << "=";
 		gotoxy(i, HEIGHT_OF_CONSOLE); cout << "=";
-	}
-
+	}  //draws game boarder
 	for (int i = 0; i < HEIGHT_OF_CONSOLE; i++) {
 		gotoxy(0, i); cout << "=";
 		gotoxy(WIDTH_OF_CONSOLE, i); cout << "=";
-	}
+	}//draws game boarder
 	for (int i = 0; i < HEIGHT_OF_CONSOLE; i++) {
 		gotoxy(WIDTH_OF_CONSOLE, i); cout << "=";
-	}
+	}//draws game boarder
 }  //function to produce the game boarder using equal signs
 
 void ProducePlastic(int ind) {
@@ -234,14 +233,14 @@ void drawFish1() {
 			gotoxy(j + 2, i + FishPosition); cout << Fish1[i][j];
 		}
 	}
-}  //function to 'draw' the character in level 1 and 2
+}  //function to 'draw' the character in level 1 and 2 at initial x and y posistion
 void drawFish3() {
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 9; j++) {
 			gotoxy(j + 2, i + FishPosition); cout << Fish2[i][j];
 		}
 	}
-}  //function to draw the character in level 3
+}  //function to draw the character in level 3 at initial x and y position
 
 void eraseFish1() {
 	for (int i = 0; i < 1; i++) {
@@ -261,7 +260,7 @@ void eraseFish3() {
 int collision1() {
 	if (PlasticPosition[0] >= 61) {
 		if (FishPosition < SwimGapPosition[0] || FishPosition > SwimGapPosition[0] + SizeOfSwimGap1) {
-			_getch();
+			_getch(); //any keyboard input
 			return 1;
 		}
 	}
@@ -279,7 +278,7 @@ int collision2() {
 int collision3() {
 	if (PlasticPosition[0] >= 61) {
 		if (FishPosition < SwimGapPosition[0] || FishPosition > SwimGapPosition[0] + SizeOfSwimGap3) {
-			_getch();
+			_getch();  //any keyboard input
 			return 1;
 		}
 	}
@@ -287,7 +286,7 @@ int collision3() {
 }  //function detecting collision in level 1
 
 void Game_Over() {
-	system("cls");
+	system("cls");  //clears the console window to prevent overlapping
 	cout << endl;
 	cout << "\t\t";
 	GAME_OVER_COLOUR("______   GAME   ___________");
@@ -335,7 +334,7 @@ void Game_Over() {
 	}
 	cout << "\n\n\n\t\tPress any key to go back to menu.";
 	AttemptCount++;
-	_getch();
+	_getch();  //any keyboard input
 
 }  //function that display a game over screen when the character collides with the ceiling, base or obstacles 
 
@@ -400,7 +399,7 @@ void playGame1() {
 			if (spacebar == 27) {
 				break;
 			}
-		}
+		}  //if statement which detects if spacebar is pressed to increase the fishes height else decrease
 
 		drawFish1();
 		drawPlastic1(0);
