@@ -1,15 +1,15 @@
-#include<iostream> 
-#include <windows.h> 
-#include<dos.h>
-#include<stdlib.h> 
-#include <stdio.h>
-#include<conio.h>
+#include<iostream> // Enables reading and writing of standard input.
+#include <windows.h> // Enables GetStdHandle(STD_OUTPU_HANDLE) for the console to write across.
+#include<dos.h> // Enables functions for managing interrupts, sound, time, and dates.
+#include<stdlib.h> // Enables srand() and cursor positioning functionality.
+#include <stdio.h> // Enables print formatted colour functionality.
+#include<conio.h> // Enables _kbhit(void); and _getch(); 
 using namespace std;
 
 #define WIDTH_OF_CONSOLE 90  //predefined console width
 #define HEIGHT_OF_CONSOLE 26  //predefined console height
 #define WIDTH_OF_CONSOLE 70  //predefined console width
-#define SizeOfSwimGap1 10  //obstacle gap for level 1
+#define SizeOfSwimGap1 10  //obstacle gap for level 1 i.e. game difficulty.
 #define SizeOfSwimGap2 6  //obstacle gap for level 2
 #define SizeOfSwimGap3 4  //obstacle gap for level 3
 int AttemptCount = 0; //number of games played counter
@@ -26,10 +26,15 @@ int PlasticFlag1[7];  //  obstacle posistion
 int PlasticFlag2[7];  //  obstacle posistion
 int PlasticFlag3[7];  //  obstacle posistion
 
-HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE); //obtains handle for console window. All
+// Setting Cursor Position to change the coordinates the text outputs to on the cmd.
+HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE); //obtains handle for console window.
+// This gets a handle for use to write to the console. 
+// Obtain a handle to the console screen buffer. 
+// To specify the new position of the cursor that we will set.
+// SetConsoleCursorPosition then uses that handle and the coordinates specified to place the blinking cursor in your command prompt.
 COORD PositioningOfCursor;  //x and y coording structure for console
 
-//colour attributes
+// Enumerated Colour Attributes
 enum ColorAttribute
 {
 	caNORMAL = 0,
@@ -39,6 +44,7 @@ enum ColorAttribute
 	caREVERSED = 7,
 	caCONCEALED = 8
 };
+// Enumerated Foreground Colours
 enum ForegroundColor
 {
 	fgBLACK = 30,
@@ -59,6 +65,7 @@ enum ForegroundColor
 	fgLIGHTPURPLE = 95,
 	fgTURQUOISE = 96
 };
+// Enumerated Background Colours
 enum BackgroundColor
 {
 	bgBLACK = 40,
@@ -79,14 +86,17 @@ enum BackgroundColor
 	bgLIGHTPURPLE = 105,
 	bgTURQUOISE = 106
 };
+// Function to designate the console with the requested highlight and text colours and text style (Mead's Notes, 2023).
 void setcolors(int foreground, int background, int attribute)
 {
 	printf("\033[%i;%i;%im", attribute, foreground, background);
 }
+// Function for resetting that colour palette initially selected for the console.
 void resetcolors(void)
 {
 	printf("\033[0m");
 }
+// Print-formatted-colour function.
 int printfc(int fg, int bg, int attr, const char* format, ...)
 {
 	int count;    /* characters printed (like printf) */
@@ -101,6 +111,7 @@ int printfc(int fg, int bg, int attr, const char* format, ...)
 	printf("\n");                  /* should the user do this? */
 	return count;                  /* mimic printf             */
 }
+// The INFO() function code set out below creates a white font and blue background.
 void INFO(const char* format, ...)
 {
 	va_list args;
@@ -108,6 +119,7 @@ void INFO(const char* format, ...)
 	printfc(fgYELLOW, bgLIGHTBLUE, caNORMAL, format, args);
 	va_end(args);
 }
+// The PLASTIC_COLOUR function creates a grey backgound to a emboldened font, designed for the plastic obstacles.
 void PLASTIC_COLOUR(const char* format, ...)
 {
 	va_list args;
@@ -115,6 +127,7 @@ void PLASTIC_COLOUR(const char* format, ...)
 	printfc(fgGRAY, bgGREY, caBOLD, format, args);
 	va_end(args);
 }
+// The GAME_OVER_COLOUR function creates a print-formatted colour that blinks yellow to a black background.
 void GAME_OVER_COLOUR(const char* format, ...)
 {
 	va_list args;
@@ -127,18 +140,25 @@ char Fish1[1][6] = { '>','<','{','{','"','>', };  //fish character 1 for level 1
 char Fish2[2][9] = { 'D',';','-','-','{','{','{','\\',',',
 					'D','"','_','_','{','{','{','/','"' };  //fish character 2 for level 2 and 3
 
+
+/*
+The gotoxy() function places the cursor at the desired location on the screen.
+	This means it is possible to change the cursor location on the screen using the gotoxy() function.
+	It is basically used to print text wherever the cursor is moved.*/
 void gotoxy(int x, int y)
 {
-	PositioningOfCursor.X = x;  //initial console x posistion 
+	PositioningOfCursor.X = x;  //initial console x posistion // Filling members of the COORD CursorPosition Struct
 	PositioningOfCursor.Y = y;  //initial console y posistion
-	SetConsoleCursorPosition(console, PositioningOfCursor);
+	SetConsoleCursorPosition(console, PositioningOfCursor); // Set cursor posiion based on the standard handle and cursor position Struct.
 } //function to set the initial x and y positions within the console
 
 void setcursor(bool visible, DWORD size)
 {
 	if (size == 0)
-		size = 20;
-
+		size = 20; //Enlarges the cursor to become invisible.
+	// Should it be set to (0,0) in main, the cursor will disappear and sizing would be 20, and invisible.
+	// Note: DWORD is enabled by <windows.h>. Although unsigned int only works for certain platforms given that Integers may be 16/32/64 bits.
+	// Whereas, DWORD specifies gives itself its own size, a double word. I.e. twice a 16 bit word so 32 bits, enabled across any platform.
 	CONSOLE_CURSOR_INFO lpCursor{};
 	lpCursor.bVisible = visible;
 	lpCursor.dwSize = size;
@@ -160,11 +180,13 @@ void drawBorder() {
 	}//draws game boarder
 }  //function to produce the game boarder using equal signs
 
+//  Function to define the random vertical positioning of gap between columns.  
 void ProducePlastic(int ind) {
 	srand(time(NULL));
 	SwimGapPosition[ind] = 3 + rand() % 14;
 }  //function randomises the height of the obstacles from the floor and ceiling but keeps the swimgaps consistance depending on the level selected.
 
+// This function draws the height of the plastic columns for the width of the window.
 void drawPlastic1(int ind) {
 	if (PlasticFlag1[ind] == true) {
 		for (int i = 0; i < SwimGapPosition[ind]; i++) {
@@ -185,6 +207,7 @@ void drawPlastic2(int ind) {
 		}
 	}
 }  //function to 'draw' the obstacles for level 2
+
 void drawPlastic3(int ind) {
 	if (PlasticFlag3[ind] == true) {
 		for (int i = 0; i < SwimGapPosition[ind]; i++) {
@@ -195,6 +218,7 @@ void drawPlastic3(int ind) {
 		}
 	}
 }  //function to 'draw' the obstacles for level 3
+
 
 void erasePlastic1(int ind) {
 	if (PlasticFlag1[ind] == true) {
@@ -257,6 +281,8 @@ void eraseFish3() {
 	}
 }  //function to remove the character in level 3
 
+
+// Function generates a game pause (until button press) when the fish collides with plastic.
 int collision1() {
 	if (PlasticPosition[0] >= 61) {
 		if (FishPosition < SwimGapPosition[0] || FishPosition > SwimGapPosition[0] + SizeOfSwimGap1) {
@@ -285,6 +311,7 @@ int collision3() {
 	return 0;
 }  //function detecting collision in level 1
 
+// Set Game Over screen by clearing screen, setting statements, and ending function upon key press.
 void Game_Over() {
 	system("cls");  //clears the console window to prevent overlapping
 	cout << endl;
@@ -297,7 +324,7 @@ void Game_Over() {
 	cout << "\n\n\n\n\t\tPlastic is reducing fish numbers.\n\n\n\n";
 	srand(time(NULL));
 	int choice = std::rand() % 10;
-	switch (choice) {
+	switch (choice) { // Random generated home message for the player when the fish collides with the plastic.
 	case 0:
 		cout << "\t\tThe Fish was Swallowed Up by Plastic in the Ocean.\n";
 		break;
@@ -354,9 +381,10 @@ void UpdateScoreboard3() {
 	gotoxy(WIDTH_OF_CONSOLE + 7, 9); cout << "High Score: " << HighScore2 << endl;
 }  //scoreboard counter for level 3
 
-void User_Information() {
 
-	system("cls");
+// Set User Information screen by clearing screen, setting statements, and ending function upon key press.
+void User_Information() {
+	system("cls"); // system(“cls”) to make the screen/terminal clear.
 	cout << "User_Information";
 	cout << "\n----------------";
 	cout << "\nSadly there is plenty of plastic polluting the oceans.";
@@ -378,6 +406,7 @@ void playGame1() {
 	ProducePlastic(0);
 	UpdateScoreboard1();
 
+	// Fixed instruction window on right of screen.
 	gotoxy(WIDTH_OF_CONSOLE + 3, 2); cout << "Plastic Ocean";
 	gotoxy(WIDTH_OF_CONSOLE + 6, 3); cout << "   Fish";
 	gotoxy(WIDTH_OF_CONSOLE + 6, 6); cout << "             ";
@@ -425,7 +454,7 @@ void playGame1() {
 			return;
 		}
 
-
+		// If statements to iterate the plastic along and restart once meets the left of the screen.
 		if (PlasticFlag1[0] == 1)
 			PlasticPosition[0] += 2;
 
@@ -556,10 +585,10 @@ void playGame3() {
 	_getch();
 	gotoxy(10, 5); cout << "                      ";
 
-	while (1) {
+	while (1) { // Method for providing an infinite loop that will be interrupted from within its code block.
 
-		if (_kbhit()) {
-			char spacebar = _getch();
+		if (_kbhit()) { // _kbhit function monitors the console for a keyboard presses
+			char spacebar = _getch(); // _getch  takes that keyboard press and as in this case is inserted and held by a char
 			if (spacebar == 32) {
 				if (FishPosition > 3)
 					FishPosition -= 3;
@@ -655,6 +684,7 @@ void MainMenu() {
 
 int main()
 {
+	// Sets background colour to blue to mimic ocean.
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED |
 		FOREGROUND_GREEN |
 		FOREGROUND_INTENSITY |
@@ -670,8 +700,7 @@ int main()
 			FOREGROUND_INTENSITY |
 			BACKGROUND_BLUE
 		);
-	} while (1);
-
+	} while (1); 
 
 	return 0;
 }  //when application is run the initial colours are assigned and the main menu function is run allowing the user to progress and play the game
